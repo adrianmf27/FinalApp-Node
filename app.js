@@ -2,12 +2,10 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
-// Ruta principal
 app.get('/', (req, res) => {
-  res.send('¡Hola Mundo desde Express!');
+  res.send('Hello world!');
 });
 
-// Iniciar el servidor
 app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
+  console.log(`Executing server in port ${port}`);
 });
