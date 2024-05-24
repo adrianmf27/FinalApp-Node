@@ -31,8 +31,7 @@ routerUsers.post("/", async (req,res)=>{
     let insertedUser = null;
     try {
 
-        userWithSameEmail = await database.query('SELECT email FROM users WHERE email = ?',
-            [email])
+        userWithSameEmail = await database.query('SELECT email FROM users WHERE email = ?', [email])
 
         if ( userWithSameEmail.length > 0){
             database.disConnect();

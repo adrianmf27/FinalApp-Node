@@ -122,12 +122,33 @@ routerPresents.put("/:id", async (req,res)=>{
 
     database.connect();
     let updatedItem = null;
+    let gift = await database.query('SELECT * from presents, users WHERE id == ?', [id])
 
     try 
     {
-        updatedItem = await database.query('UPDATE presents SET name = ?, description = ?,' 
-            + 'url = ?, initialPrice = ? WHERE id = ? AND idUser = ?', 
-            [name, description, url, price, id, req.infoInApiKey.id ])
+        let ownerEmail = await database.query('SELECT users.email'
+            + 'FROM users, presents where users.id = presents.userId and presents.id = ?', [id])
+        
+        if(ownerEmail.length >= 1)
+        {
+            let friends = await database.query('SELECT * from friends' 
+                + 'WHERE emailUser == ? and emailFriend = ?', [ownerEmail, email])
+
+            if(friends.length >= 1 && !gift.choosenBy && req.infoInApiKey.email != ownerEmail)
+            {
+                updatedItem = await database.query('UPDATE presents SET name = ?, description = ?,' 
+                    + 'url = ?, initialPrice = ? WHERE id = ? AND idUser = ?', 
+                    [name, description, url, price, id, req.infoInApiKey.id ])
+            }           
+        }
+        else
+        {
+            if(!gift.choosenBy)
+            {
+                updatedItem = await database.query('UPDATE presents choosenBy == ? WHERE id = ? AND idUser = ?', 
+                    [ req.infoInApiKey.email, id, req.infoInApiKey.id ])
+            }
+        }
 
     } catch (e)
     {
@@ -137,6 +158,61 @@ routerPresents.put("/:id", async (req,res)=>{
 
     database.disConnect();
     res.json({modifiyed: updatedItem})
+})
+
+routerFriends.get("/?userEmail=<email> ", async (req,res)=>{
+    let email = req.infoInApiKey.email
+    let emailOfFriend = req.body.email
+
+    if(!email || email == undefined || email == null || email == "")
+    {
+        return res.status(400).json({ error: 'Email of apikey of the user is required' });
+    }
+
+    if(!emailOfFriend || emailOfFriend == undefined || emailOfFriend == null || emailOfFriend == "")
+    {
+        return res.status(400).json({ error: 'Email of the friend is required' });
+    }
+
+    let presents = []
+    database.connect();
+
+    try
+    {
+        let query = await database.query('SELECT * users WHERE email == ?',[email])
+        if (query?.length < 1)
+        {
+            return res.status(400).json({ error: 'User not found' });
+        }
+    
+        let queryFriend = await database.query('SELECT * users WHERE email == ?',[emailOfFriend])
+        if (queryFriend?.length < 1)
+        {
+            return res.status(400).json({ error: 'Friend user not found' });
+        }
+    
+        let areFriends = await database.query('SELECT * friends WHERE emailUser == ?' +
+                'and emailFriend == ?', [email, emailOfFriend])
+        
+        if(areFriends?.length > 0)
+        {
+            let userId = await database.query('SELECT id users WHERE email == ?',[email])
+            presents = await database.query('SELECT * presents WHERE userId == ?',[userId])
+        }
+        else
+        {
+            return res.status(400).json({ error: 'Users are not friends' });
+        }
+        res.send(presents)
+    }
+    catch (error)
+    {
+        console.log(error)
+        return res.status(400).json({ error: 'Internal server error' });
+    }
+    finally {
+        database.disConnect();
+    }
 })
 
 

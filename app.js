@@ -1,10 +1,8 @@
 const express = require('express')
 const jwt = require("jsonwebtoken"); 
-const database = require("./database")
 const activeApiKeys = require("./activeApiKeys")
 
 const routerUsers = require("./routers/routerUsers")
-const routerFriends = require("./routers/routerFriends")
 const routerPresents = require("./routers/routerPresents")
 
 const port = 4000
@@ -19,14 +17,14 @@ app.use(["/presents","/gifts"] ,(req,res,next)=>{
 
 	let apiKey = req.query.apiKey
 	if ( apiKey == undefined )
-  {
+  	{
 		res.status(401).json({ error: "No apiKey" });
 		return 
 	}
 
 	let infoInApiKey = jwt.verify(apiKey, "Secret");
 	if ( infoInApiKey == undefined || activeApiKeys.indexOf(apiKey) == -1)
-  {
+ 	{
 		res.status(401).json({ error: "Invalid apiKey" });
 		return 	
 	}
@@ -36,9 +34,7 @@ app.use(["/presents","/gifts"] ,(req,res,next)=>{
 })
 
 app.use("/users", routerUsers)
-app.use("/friends", routerFriends)
 app.use("/presents", routerPresents)
-
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
