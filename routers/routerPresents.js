@@ -160,7 +160,7 @@ routerPresents.put("/:id", async (req,res)=>{
     res.json({modifiyed: updatedItem})
 })
 
-routerFriends.get("/?userEmail=<email> ", async (req,res)=>{
+routerPresents.get("/?userEmail=<email> ", async (req,res)=>{
     let email = req.infoInApiKey.email
     let emailOfFriend = req.body.email
 
