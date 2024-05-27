@@ -51,6 +51,7 @@ routerUsers.post("/", async (req,res)=>{
 })
 
 routerUsers.post("/login", async (req,res)=>{
+    let name = req.body.name
     let email = req.body.email
     let password = req.body.password 
 
@@ -86,8 +87,8 @@ routerUsers.post("/login", async (req,res)=>{
 
     let apiKey = jwt.sign(
 		{ 
-			email: selectedUsers[0].email,
-			id: selectedUsers[0].id
+            id: selectedUsers[0].id,
+			email: selectedUsers[0].email
 		},
 		"secret");
 	activeApiKeys.push(apiKey)
@@ -100,7 +101,7 @@ routerUsers.post("/login", async (req,res)=>{
     })
 })
 
-routerUsers.get("/disconect", async (req,res)=>{
+routerUsers.get("/disconnect", async (req,res)=>{
     const index = activeApiKeys.indexOf(req.query.apiKey);
 
     if (index > -1) { 

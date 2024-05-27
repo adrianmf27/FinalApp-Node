@@ -15,7 +15,7 @@ routerFriends.post("/", async(req, res) => {
 
     try
     {
-        let existingFriend = await database.query('SELECT COUNT(*) FROM friends' 
+        let existingFriend = await database.query('SELECT COUNT(*) FROM friends ' 
             + 'WHERE emailUser == ? AND emailFriend == ?', [req.infoInApiKey.email, friendEmail])
 
         if(existingFriend?.length < 1)
@@ -76,7 +76,7 @@ routerFriends.delete("/:email", async (req, res) => {
     database.connect()
     try
     {
-        await database.query('DELETE FROM friends' 
+        await database.query('DELETE FROM friends ' 
             + 'WHERE emailUser == ? AND emailFriend == ?', [userEmail, email])
     }
     catch (error)

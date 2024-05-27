@@ -31,8 +31,8 @@ routerPresents.post("/", async (req,res)=>{
 
     try {
         insertedItem = await database.query(
-            'INSERT INTO presents (idUser, name, description, url, price, chosenBy) VALUES (?, ?, ?, ?, ?, ?)',
-            [req.infoInApiKey.id, name, description, url, price, null])
+            'INSERT INTO presents (userId, name, description, url, price, choosenBy) VALUES (?, ?, ?, ?, ?, ?)',
+            [req.infoInApiKey.id, name, description, url, price, ""])
 
     } catch (e){
         database.disConnect();
@@ -50,12 +50,12 @@ routerPresents.get("/", async (req,res)=>{
     let items = []
     database.connect();
 
-    let users = await database.query('SELECT * users WHERE email == ?',[email])
+    let users = await database.query('SELECT * FROM users WHERE email = ?',[email])
 
     if(users.length > 0 && idUser != undefined)
     {
-        items = await database.query('SELECT presents.* , users.email'
-            + 'FROM presents JOIN users ON presents.idUser = users.id WHERE presents.idUser =  ?', [idUser])
+        items = await database.query('SELECT presents.* , users.email '
+            + 'FROM presents JOIN users ON presents.idUser = users.id WHERE presents.userId =  ?', [idUser])
     }
 
     database.disConnect();
@@ -70,7 +70,7 @@ routerPresents.get('/:id', async (req, res) => {
     }
 
     database.connect();
-    const items = await database.query('SELECT presents.* , users.email'
+    const items = await database.query('SELECT presents.* , users.email '
         + 'FROM presents JOIN users ON presents.idUser = users.id WHERE presents.id =  ?', [id])
 
     if (items.length < 1)
@@ -126,17 +126,17 @@ routerPresents.put("/:id", async (req,res)=>{
 
     try 
     {
-        let ownerEmail = await database.query('SELECT users.email'
+        let ownerEmail = await database.query('SELECT users.email '
             + 'FROM users, presents where users.id = presents.userId and presents.id = ?', [id])
         
         if(ownerEmail.length >= 1)
         {
-            let friends = await database.query('SELECT * from friends' 
+            let friends = await database.query('SELECT * from friends ' 
                 + 'WHERE emailUser == ? and emailFriend = ?', [ownerEmail, email])
 
             if(friends.length >= 1 && !gift.choosenBy && req.infoInApiKey.email != ownerEmail)
             {
-                updatedItem = await database.query('UPDATE presents SET name = ?, description = ?,' 
+                updatedItem = await database.query('UPDATE presents SET name = ?, description = ?, ' 
                     + 'url = ?, initialPrice = ? WHERE id = ? AND idUser = ?', 
                     [name, description, url, price, id, req.infoInApiKey.id ])
             }           

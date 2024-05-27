@@ -13,7 +13,7 @@ var cors = require('cors')
 app.use(cors())
 app.use(express.json())
 
-app.use(["/presents","/friends"] ,(req,res,next)=>{
+app.use(["/presents", "/friends"] ,(req,res,next) => {
 	console.log("Middleware execution")
 
 	let apiKey = req.query.apiKey
@@ -23,7 +23,12 @@ app.use(["/presents","/friends"] ,(req,res,next)=>{
 		return 
 	}
 
-	let infoInApiKey = jwt.verify(apiKey, "Secret");
+	let infoInApiKey = jwt.verify(apiKey, "secret");
+
+	console.log(infoInApiKey.id)
+	console.log(infoInApiKey.email)
+	console.log(activeApiKeys?.length)
+	
 	if ( infoInApiKey == undefined || activeApiKeys.indexOf(apiKey) == -1)
  	{
 		res.status(401).json({ error: "Invalid apiKey" });
