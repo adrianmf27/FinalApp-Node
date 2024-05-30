@@ -55,7 +55,7 @@ routerPresents.get("/", async (req,res)=>{
     if(users.length > 0 && idUser != undefined)
     {
         items = await database.query('SELECT presents.* , users.email '
-            + 'FROM presents JOIN users ON presents.idUser = users.id WHERE presents.userId =  ?', [idUser])
+            + 'FROM presents JOIN users ON presents.userId = users.id WHERE presents.userId =  ?', [idUser])
     }
 
     database.disConnect();
@@ -95,13 +95,7 @@ routerPresents.delete("/:id", async (req,res)=>{
 
     try 
     {    
-        let presents = await database.query('SELECT * FROM presents WHERE id = ? AND idUser = ?', 
-            [id, req.infoInApiKey.id])
-
-        if ( presents.length > 0 )
-        {
-            await database.query('DELETE FROM presents WHERE id = ?', [id])
-        }
+        await database.query('DELETE FROM presents WHERE id = ?', [id])
     } 
     catch (e)
     {

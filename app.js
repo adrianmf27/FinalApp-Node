@@ -24,10 +24,6 @@ app.use(["/presents", "/friends"] ,(req,res,next) => {
 	}
 
 	let infoInApiKey = jwt.verify(apiKey, "secret");
-
-	console.log(infoInApiKey.id)
-	console.log(infoInApiKey.email)
-	console.log(activeApiKeys?.length)
 	
 	if ( infoInApiKey == undefined || activeApiKeys.indexOf(apiKey) == -1)
  	{

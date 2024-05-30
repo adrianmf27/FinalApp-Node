@@ -4,6 +4,7 @@ const routerFriends = express.Router();
 const database = require("../database")
 
 routerFriends.post("/", async(req, res) => {
+    console.log("Adding a friend")
     let friendEmail = req.body.email
 
     if (!friendEmail || friendEmail == undefined || friendEmail == null || friendEmail == "") {
@@ -15,71 +16,54 @@ routerFriends.post("/", async(req, res) => {
 
     try
     {
-        let existingFriend = await database.query('SELECT COUNT(*) FROM friends ' 
-            + 'WHERE emailUser == ? AND emailFriend == ?', [req.infoInApiKey.email, friendEmail])
-
-        if(existingFriend?.length < 1)
-        {
-            return res.status(400).json({error: "Already an existing friend"})
-        }
-
         insertedFriend = await database.query("INSERT INTO FRIENDS VALUES (?, ?)", 
             [req.infoInApiKey.email, friendEmail])
     }
-    catch (error)
+    catch (e)
     {
         database.disConnect();
+        console.log(e)
         return res.status(400).json({error: e})
     }
     
     database.disConnect();
-    res.json({inserted: insertedUser})
+    res.json({inserted: insertedFriend})
 })
 
 routerFriends.get("/", async (req, res) => {
     let userEmail = req.infoInApiKey.email
 
-    if (!userEmail) {
+    if (userEmail == undefined) {
         return res.status(400).json({ error: "User not found" });
     }
 
     database.connect()
-    let friends = []
+    let friends = await database.query("SELECT emailFriend FROM FRIENDS where emailUser = ?", [userEmail])
 
-    try
+    if(friends.length == 0)
     {
-        friends = await database.query("SELECTT * FROM friends where emailUser = ?", [userEmail])
-
-        if(friends.length < 1)
-        {
-            return res.status(400).json({error: "This user has no friends"})
-        }
-    }
-    catch (error)
-    {
-        database.disConnect()
-        return res.status(400).json({error: e})
+        return res.status(400).json({error: "This user has no friends"})
     }
 
     database.disConnect()
     res.send(friends)
 })
 
-routerFriends.delete("/:email", async (req, res) => {
-    let email = req.params.email
+routerFriends.delete("/:emailFriend", async (req, res) => {
+    let emailFriend = req.params.emailFriend
     let userEmail = req.infoInApiKey.email
 
-    if (!email) {
+    if (emailFriend == undefined) {
         return res.status(400).json({ error: "Friend email is required" });
     }
 
     database.connect()
     try
     {
-        await database.query('DELETE FROM friends ' 
-            + 'WHERE emailUser == ? AND emailFriend == ?', [userEmail, email])
+        await database.query('DELETE FROM friends WHERE emailUser = ? AND emailFriend = ?', 
+            [userEmail, emailFriend])
     }
-    catch (error)
+    catch (e)
     {
         database.disConnect()
         return res.status(400).json({error: e})

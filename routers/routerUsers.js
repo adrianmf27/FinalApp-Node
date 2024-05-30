@@ -51,7 +51,6 @@ routerUsers.post("/", async (req,res)=>{
 })
 
 routerUsers.post("/login", async (req,res)=>{
-    let name = req.body.name
     let email = req.body.email
     let password = req.body.password 
 
