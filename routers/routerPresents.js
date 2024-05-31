@@ -197,8 +197,9 @@ routerPresents.get("/", async (req, res) => {
                 return res.status(400).json({ error: 'Users are not friends' })
             }
 
-            let friendUserId = friendQuery[0].id;
-            let presents = await database.query('SELECT * FROM presents WHERE userId = ?', [friendUserId])
+            let friendUserId = friendQuery[0].id
+            let presents = await database.query('SELECT * FROM presents WHERE userId = ? and choosenBy = ""'
+                , [friendUserId])
 
             res.json(presents);
         } 
