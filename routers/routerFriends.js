@@ -4,7 +4,6 @@ const routerFriends = express.Router();
 const database = require("../database")
 
 routerFriends.post("/", async(req, res) => {
-    console.log("Adding a friend")
     let friendEmail = req.body.email
 
     if (!friendEmail || friendEmail == undefined || friendEmail == null || friendEmail == "") {
@@ -21,8 +20,7 @@ routerFriends.post("/", async(req, res) => {
     }
     catch (e)
     {
-        database.disConnect();
-        console.log(e)
+        database.disConnect()
         return res.status(400).json({error: e})
     }
     
@@ -48,6 +46,36 @@ routerFriends.get("/", async (req, res) => {
     database.disConnect()
     res.send(friends)
 })
+
+routerFriends.get("/friend", async (req, res) => {
+    let friendEmail = req.query.emailFriend
+    let userEmail = req.infoInApiKey.email
+
+    if (userEmail == undefined) {
+        return res.status(400).json({ error: "User not found" });
+    }
+
+    if (friendEmail == undefined) {
+        return res.status(400).json({ error: "Friend not found" });
+    }
+
+    database.connect()
+    let friends = []
+    try
+    {
+        friends = await database.query("SELECT emailFriend FROM FRIENDS"
+        + " where emailUser = ? and emailFriend = ?", [userEmail, friendEmail])
+    }
+    catch(e)
+    {
+        database.disConnect
+        res.send({error: e})
+    }
+
+    database.disConnect()
+    res.send(friends)
+})
+
 
 routerFriends.delete("/:emailFriend", async (req, res) => {
     let emailFriend = req.params.emailFriend
