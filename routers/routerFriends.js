@@ -35,19 +35,13 @@ routerFriends.post("/", async(req, res) => {
 
 routerFriends.get("/", async (req, res) => {
     let userEmail = req.infoInApiKey.email
-    let listId = req.body.listId
 
     if (userEmail == undefined) {
         return res.status(400).json({ error: "User not found" });
     }
 
-    if(!listId || parseInt(listId) < 0) {
-        return res.status(400).json({ error: "Incorrect list id data value" });
-    }
-
     database.connect()
-    let friends = await database.query("SELECT emailFriend FROM FRIENDS " 
-        + "where emailUser = ? and listId = ?", [userEmail, listId])
+    let friends = await database.query("SELECT emailFriend, listId FROM friends where emailUser = ?", [userEmail])
 
     if(friends.length == 0)
     {
@@ -61,7 +55,6 @@ routerFriends.get("/", async (req, res) => {
 routerFriends.get("/friend", async (req, res) => {
     let friendEmail = req.query.emailFriend
     let userEmail = req.infoInApiKey.email
-    let listId = req.body.listId
 
     if (userEmail == undefined) {
         return res.status(400).json({ error: "User not found" });
@@ -71,16 +64,13 @@ routerFriends.get("/friend", async (req, res) => {
         return res.status(400).json({ error: "Friend not found" });
     }
 
-    if(!listId || parseInt(listId) < 0) {
-        return res.status(400).json({ error: "Incorrect list id data value" });
-    }
-
     database.connect()
     let friends = []
+
     try
     {
-        friends = await database.query("SELECT emailFriend FROM FRIENDS"
-        + " where emailUser = ? and emailFriend = ? and listId = ?", [userEmail, friendEmail, listId])
+        friends = await database.query("SELECT emailFriend, listId FROM FRIENDS"
+        + " where emailUser = ? and emailFriend = ?", [userEmail, friendEmail])
     }
     catch(e)
     {

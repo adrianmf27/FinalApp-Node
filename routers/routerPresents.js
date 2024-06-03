@@ -153,13 +153,8 @@ routerPresents.put("/:id", async (req, res) => {
 routerPresents.get("/", async (req, res) => {
     let userEmail = req.query.userEmail
     let email = req.infoInApiKey.email
-    let listId = req.query.listId
 
     if (!email) return res.status(400).json({ error: 'ApiKey email is required' })
-
-    if(!listId || parseInt(listId) < 0) {
-        return res.status(400).json({ error: "Incorrect list id data value" });
-    }
 
     if (!userEmail) 
     {
@@ -172,8 +167,8 @@ routerPresents.get("/", async (req, res) => {
     
         if(users.length > 0 && idUser != undefined)
         {
-            items = await database.query('SELECT presents.*, users.email FROM presents '
-                + 'JOIN users ON presents.userId = users.id WHERE presents.listId = ?',  [listId])
+            items = await database.query('SELECT presents.* , users.email '
+                + 'FROM presents JOIN users ON presents.userId = users.id WHERE presents.userId =  ?', [idUser])
         }
     
         database.disConnect()
@@ -210,7 +205,7 @@ routerPresents.get("/", async (req, res) => {
             let friendUserId = friendQuery[0].id
 
             presents = await database.query('SELECT * FROM presents WHERE choosenBy = "" '
-                + 'AND listId = ?',  [listId])
+                + 'AND userId = ?',  [friendUserId])
 
             res.json(presents)
         } 
