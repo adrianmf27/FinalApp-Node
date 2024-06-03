@@ -5,9 +5,14 @@ const database = require("../database")
 
 routerFriends.post("/", async(req, res) => {
     let friendEmail = req.body.email
+    let listId = req.body.listId
 
     if (!friendEmail || friendEmail == undefined || friendEmail == null || friendEmail == "") {
-        return res.status(400).json({ error: "Friend email is required" });
+        return res.status(400).json({ error: "Friend email is required" })
+    }
+
+    if(!listId || parseInt(listId) < 0) {
+        return res.status(400).json({ error: "Incorrect list id data value" });
     }
 
     database.connect()
@@ -15,8 +20,8 @@ routerFriends.post("/", async(req, res) => {
 
     try
     {
-        insertedFriend = await database.query("INSERT INTO FRIENDS VALUES (?, ?)", 
-            [req.infoInApiKey.email, friendEmail])
+        insertedFriend = await database.query("INSERT INTO FRIENDS VALUES (?, ?, ?)", 
+            [req.infoInApiKey.email, friendEmail, listId])
     }
     catch (e)
     {
@@ -30,13 +35,19 @@ routerFriends.post("/", async(req, res) => {
 
 routerFriends.get("/", async (req, res) => {
     let userEmail = req.infoInApiKey.email
+    let listId = req.body.listId
 
     if (userEmail == undefined) {
         return res.status(400).json({ error: "User not found" });
     }
 
+    if(!listId || parseInt(listId) < 0) {
+        return res.status(400).json({ error: "Incorrect list id data value" });
+    }
+
     database.connect()
-    let friends = await database.query("SELECT emailFriend FROM FRIENDS where emailUser = ?", [userEmail])
+    let friends = await database.query("SELECT emailFriend FROM FRIENDS " 
+        + "where emailUser = ? and listId = ?", [userEmail, listId])
 
     if(friends.length == 0)
     {
@@ -50,6 +61,7 @@ routerFriends.get("/", async (req, res) => {
 routerFriends.get("/friend", async (req, res) => {
     let friendEmail = req.query.emailFriend
     let userEmail = req.infoInApiKey.email
+    let listId = req.body.listId
 
     if (userEmail == undefined) {
         return res.status(400).json({ error: "User not found" });
@@ -59,12 +71,16 @@ routerFriends.get("/friend", async (req, res) => {
         return res.status(400).json({ error: "Friend not found" });
     }
 
+    if(!listId || parseInt(listId) < 0) {
+        return res.status(400).json({ error: "Incorrect list id data value" });
+    }
+
     database.connect()
     let friends = []
     try
     {
         friends = await database.query("SELECT emailFriend FROM FRIENDS"
-        + " where emailUser = ? and emailFriend = ?", [userEmail, friendEmail])
+        + " where emailUser = ? and emailFriend = ? and listId = ?", [userEmail, friendEmail, listId])
     }
     catch(e)
     {
@@ -80,16 +96,23 @@ routerFriends.get("/friend", async (req, res) => {
 routerFriends.delete("/:emailFriend", async (req, res) => {
     let emailFriend = req.params.emailFriend
     let userEmail = req.infoInApiKey.email
+    let listId = req.body.listId
 
+    if (userEmail == undefined) {
+        return res.status(400).json({ error: "User not found" });
+    }
     if (emailFriend == undefined) {
         return res.status(400).json({ error: "Friend email is required" });
+    }
+    if(!listId || parseInt(listId) < 0) {
+        return res.status(400).json({ error: "Incorrect list id data value" });
     }
 
     database.connect()
     try
     {
-        await database.query('DELETE FROM friends WHERE emailUser = ? AND emailFriend = ?', 
-            [userEmail, emailFriend])
+        await database.query('DELETE FROM friends WHERE emailUser = ? AND emailFriend = ? and listId = ?', 
+            [userEmail, emailFriend, listId])
     }
     catch (e)
     {

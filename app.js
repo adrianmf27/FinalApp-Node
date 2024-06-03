@@ -2,6 +2,7 @@ const express = require('express')
 const jwt = require("jsonwebtoken"); 
 const activeApiKeys = require("./activeApiKeys")
 
+const routerLists = require("./routers/routerLists")
 const routerUsers = require("./routers/routerUsers")
 const routerFriends = require("./routers/routerFriends")
 const routerPresents = require("./routers/routerPresents")
@@ -13,7 +14,7 @@ var cors = require('cors')
 app.use(cors())
 app.use(express.json())
 
-app.use(["/presents", "/friends"] ,(req,res,next) => {
+app.use(["/presents", "/friends", "/lists"] ,(req,res,next) => {
 	console.log("Middleware execution")
 
 	let apiKey = req.query.apiKey
@@ -35,7 +36,9 @@ app.use(["/presents", "/friends"] ,(req,res,next) => {
   next()
 })
 
+app.use("/lists", routerLists)
 app.use("/users", routerUsers)
+
 app.use("/friends", routerFriends)
 app.use("/presents", routerPresents)
 

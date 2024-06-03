@@ -9,7 +9,11 @@ routerPresents.post("/", async (req,res)=>{
     let description = req.body.description
     let url = req.body.url
     let price = req.body.price
-    
+    let listId = req.body.listId
+
+    if(!listId || parseInt(listId) < 0) {
+        return res.status(400).json({ error: "Incorrect list id data value" });
+    }    
     if(name == undefined || description == undefined || url == undefined || price == undefined){
         return res.status(400).json({error: "Some properties are undefined"})
     }
@@ -31,8 +35,8 @@ routerPresents.post("/", async (req,res)=>{
 
     try {
         insertedItem = await database.query(
-            'INSERT INTO presents (userId, name, description, url, price, choosenBy) VALUES (?, ?, ?, ?, ?, ?)',
-            [req.infoInApiKey.id, name, description, url, price, ""])
+            'INSERT INTO presents (userId, name, description, url, price, choosenBy, listId) ' +
+            'VALUES (?, ?, ?, ?, ?, ?, ?)', [req.infoInApiKey.id, name, description, url, price, "", listId])
 
     } catch (e){
         database.disConnect();
@@ -46,19 +50,19 @@ routerPresents.post("/", async (req,res)=>{
 
 routerPresents.get('/:id', async (req, res) => {
     let id = req.params.id
-    if ( id == undefined )
-    {
+   
+    if ( id == undefined ) {
         return res.status(400).json({error: "No id parameter"})
     }
 
     database.connect();
-    const items = await database.query('SELECT presents.* , users.email '
-        + 'FROM presents JOIN users ON presents.idUser = users.id WHERE presents.id =  ?', [id])
+    const items = await database.query('SELECT presents.* , users.email FROM presents JOIN users ON '
+        + 'presents.userId = users.id WHERE presents.id = ?', [id])
 
     if (items.length < 1)
     {
         database.disConnect();
-        return res.status(400).json({error: "Not item with this id"})
+        return res.status(400).json({error: "Not item was found"})
     } else 
     {
         database.disConnect();
@@ -68,8 +72,8 @@ routerPresents.get('/:id', async (req, res) => {
 
 routerPresents.delete("/:id", async (req,res)=>{
     let id = req.params.id
-    if ( id == undefined )
-    {
+
+    if ( id == undefined ) {
         return res.status(400).json({error: "No id parameter"})
     }
 
@@ -149,8 +153,13 @@ routerPresents.put("/:id", async (req, res) => {
 routerPresents.get("/", async (req, res) => {
     let userEmail = req.query.userEmail
     let email = req.infoInApiKey.email
+    let listId = req.query.listId
 
     if (!email) return res.status(400).json({ error: 'ApiKey email is required' })
+
+    if(!listId || parseInt(listId) < 0) {
+        return res.status(400).json({ error: "Incorrect list id data value" });
+    }
 
     if (!userEmail) 
     {
@@ -163,8 +172,8 @@ routerPresents.get("/", async (req, res) => {
     
         if(users.length > 0 && idUser != undefined)
         {
-            items = await database.query('SELECT presents.* , users.email '
-                + 'FROM presents JOIN users ON presents.userId = users.id WHERE presents.userId =  ?', [idUser])
+            items = await database.query('SELECT presents.*, users.email FROM presents '
+                + 'JOIN users ON presents.userId = users.id WHERE presents.listId = ?',  [listId])
         }
     
         database.disConnect()
@@ -197,11 +206,13 @@ routerPresents.get("/", async (req, res) => {
                 return res.status(400).json({ error: 'Users are not friends' })
             }
 
+            let presents = []
             let friendUserId = friendQuery[0].id
-            let presents = await database.query('SELECT * FROM presents WHERE userId = ? and choosenBy = ""'
-                , [friendUserId])
 
-            res.json(presents);
+            presents = await database.query('SELECT * FROM presents WHERE choosenBy = "" '
+                + 'AND listId = ?',  [listId])
+
+            res.json(presents)
         } 
         catch (error) 
         {
