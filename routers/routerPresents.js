@@ -153,8 +153,18 @@ routerPresents.put("/:id", async (req, res) => {
 routerPresents.get("/", async (req, res) => {
     let userEmail = req.query.userEmail
     let email = req.infoInApiKey.email
+    let myPresents = req.query.myPresents
 
     if (!email) return res.status(400).json({ error: 'ApiKey email is required' })
+
+    if(myPresents) 
+    {
+        database.connect()
+        let result = await database.query('SELECT * FROM presents WHERE choosenBy = ?', [email])
+        database.disConnect()
+        res.send(result)
+        return
+    }
 
     if (!userEmail) 
     {
@@ -207,7 +217,7 @@ routerPresents.get("/", async (req, res) => {
             presents = await database.query('SELECT * FROM presents WHERE choosenBy = "" '
                 + 'AND userId = ?',  [friendUserId])
 
-            res.json(presents)
+            res.send(presents)
         } 
         catch (error) 
         {

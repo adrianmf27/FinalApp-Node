@@ -32,7 +32,7 @@ app.use(["/presents", "/friends", "/lists"] ,(req,res,next) => {
 		return 	
 	}
 
-	req.infoInApiKey = infoInApiKey;
+	req.infoInApiKey = infoInApiKey
   next()
 })
 
