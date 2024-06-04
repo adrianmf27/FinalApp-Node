@@ -20,6 +20,14 @@ routerFriends.post("/", async(req, res) => {
 
     try
     {
+        let list = await database.query("select * from lists where id = ?", [listId])
+
+        if(list.length == 0)
+        {
+            await database.query("insert into lists (name, userId) values (?, ?)", 
+                ["list" + listId, req.infoInApiKey.id])
+        }
+
         insertedFriend = await database.query("INSERT INTO FRIENDS VALUES (?, ?, ?)", 
             [req.infoInApiKey.email, friendEmail, listId])
     }

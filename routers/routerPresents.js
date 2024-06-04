@@ -34,6 +34,14 @@ routerPresents.post("/", async (req,res)=>{
     let insertedItem = null;
 
     try {
+        let list = await database.query("select * from lists where id = ?", [listId])
+
+        if(list.length == 0)
+        {
+            await database.query("insert into lists (name, userId) values (?, ?)", 
+                ["list" + listId, req.infoInApiKey.id])
+        }
+
         insertedItem = await database.query(
             'INSERT INTO presents (userId, name, description, url, price, choosenBy, listId) ' +
             'VALUES (?, ?, ?, ?, ?, ?, ?)', [req.infoInApiKey.id, name, description, url, price, "", listId])
