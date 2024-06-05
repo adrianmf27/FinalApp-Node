@@ -10,7 +10,6 @@ routerFriends.post("/", async(req, res) => {
     if (!friendEmail || friendEmail == undefined || friendEmail == null || friendEmail == "") {
         return res.status(400).json({ error: "Friend email is required" })
     }
-
     if(!listId || parseInt(listId) < 0) {
         return res.status(400).json({ error: "Incorrect list id data value" });
     }
@@ -67,7 +66,6 @@ routerFriends.get("/friend", async (req, res) => {
     if (userEmail == undefined) {
         return res.status(400).json({ error: "User not found" });
     }
-
     if (friendEmail == undefined) {
         return res.status(400).json({ error: "Friend not found" });
     }

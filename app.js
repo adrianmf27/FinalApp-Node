@@ -20,20 +20,19 @@ app.use(["/presents", "/friends", "/lists"] ,(req,res,next) => {
 	let apiKey = req.query.apiKey
 	if ( apiKey == undefined )
   	{
-		res.status(401).json({ error: "No apiKey" });
+		res.status(401).json({ error: "No apiKey" })
 		return 
 	}
 
-	let infoInApiKey = jwt.verify(apiKey, "secret");
-	
+	let infoInApiKey = jwt.verify(apiKey, "secret")
 	if ( infoInApiKey == undefined || activeApiKeys.indexOf(apiKey) == -1)
  	{
-		res.status(401).json({ error: "Invalid apiKey" });
+		res.status(401).json({ error: "Invalid apiKey" })
 		return 	
 	}
 
 	req.infoInApiKey = infoInApiKey
-  next()
+  	next()
 })
 
 app.use("/lists", routerLists)
@@ -42,6 +41,4 @@ app.use("/users", routerUsers)
 app.use("/friends", routerFriends)
 app.use("/presents", routerPresents)
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+app.listen(port, () => { console.log(`Example app listening on port ${port}`) })

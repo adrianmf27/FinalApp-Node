@@ -139,7 +139,6 @@ routerPresents.put("/:id", async (req, res) => {
             {
                 return res.status(400).json({ error: "You are not friends with the owner of this present" })
             }
-
             if (choosenBy) 
             {
                 return res.status(400).json({ error: "This present is already choosen by another user" })
